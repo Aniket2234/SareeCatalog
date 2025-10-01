@@ -268,6 +268,14 @@ export default function Header() {
     }, 300);
     const url = `/home?category=${category}#categories`;
     setLocation(url);
+    
+    // Ensure scroll happens after navigation
+    setTimeout(() => {
+      const categoriesSection = document.getElementById('categories');
+      if (categoriesSection) {
+        categoriesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 400);
   };
 
   const toggleMobileMenu = () => {
