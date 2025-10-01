@@ -4,10 +4,8 @@ import { storage } from "./storage";
 import { productSearchSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Connect to MongoDB
-  await storage.connect();
+  await storage.initializeData();
 
-  // Categories routes
   app.get("/api/categories", async (req, res) => {
     try {
       const categories = await storage.getCategories();
@@ -32,7 +30,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Products routes
   app.get("/api/products", async (req, res) => {
     try {
       const searchParams = productSearchSchema.parse({
@@ -52,7 +49,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid product ID" });
+      }
+
       const product = await storage.getProductById(id);
       
       if (!product) {
@@ -90,12 +91,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
-
-  // Graceful shutdown
-  process.on('SIGINT', async () => {
-    await storage.disconnect();
-    process.exit(0);
-  });
 
   return httpServer;
 }
