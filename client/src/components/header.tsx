@@ -266,16 +266,10 @@ export default function Header() {
       setIsMobileMenuOpen(false);
       document.body.style.overflow = 'unset';
     }, 300);
-    const url = `/home?category=${category}#categories`;
-    setLocation(url);
     
-    // Ensure scroll happens after navigation
-    setTimeout(() => {
-      const categoriesSection = document.getElementById('categories');
-      if (categoriesSection) {
-        categoriesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 400);
+    // Use window.location to ensure the page properly reads the URL parameters
+    const url = `/home?category=${category}#categories`;
+    window.location.href = url;
   };
 
   const toggleMobileMenu = () => {
