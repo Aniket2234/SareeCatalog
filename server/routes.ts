@@ -42,7 +42,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const products = await storage.getProducts(searchParams);
       res.json(products);
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid query parameters" });
+      }
       res.status(500).json({ error: "Failed to fetch products" });
     }
   });
