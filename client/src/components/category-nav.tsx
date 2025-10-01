@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { type Category } from "@shared/schema";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface CategoryNavProps {
   categories: Category[];
@@ -16,10 +16,25 @@ export default function CategoryNav({
   isLoading,
 }: CategoryNavProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const categoryRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+
+  // Scroll selected category into view
+  useEffect(() => {
+    if (selectedCategory && selectedCategory !== "all" && categoryRefs.current[selectedCategory]) {
+      const selectedElement = categoryRefs.current[selectedCategory];
+      if (selectedElement && scrollContainerRef.current) {
+        selectedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
+  }, [selectedCategory]);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -114,6 +129,7 @@ export default function CategoryNav({
           {categories.map((category) => (
             <button
               key={category._id}
+              ref={(el) => (categoryRefs.current[category.slug] = el)}
               onClick={() => onCategoryChange(category.slug)}
               className="flex-shrink-0 transition-transform duration-300 hover:scale-110 flex items-center justify-center"
               data-testid={`category-btn-${category.slug}`}
