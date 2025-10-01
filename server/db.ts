@@ -1,14 +1,31 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
-import * as schema from "@shared/schema";
+import { MongoClient, Db } from 'mongodb';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is required");
+if (!process.env.MONGODB_URI) {
+  throw new Error('MONGODB_URI environment variable is required');
 }
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: false
-});
+const client = new MongoClient(process.env.MONGODB_URI);
+let db: Db;
 
-export const db = drizzle(pool, { schema });
+export async function connectToDatabase() {
+  if (!db) {
+    await client.connect();
+    db = client.db('saree_catalog');
+    console.log('Connected to MongoDB');
+  }
+  return db;
+}
+
+export function getDatabase() {
+  if (!db) {
+    throw new Error('Database not connected. Call connectToDatabase() first.');
+  }
+  return db;
+}
+
+export async function closeDatabase() {
+  if (client) {
+    await client.close();
+    console.log('Disconnected from MongoDB');
+  }
+}

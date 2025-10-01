@@ -261,8 +261,12 @@ export default function Header() {
   }, []);
 
   const handleCategoryClick = (category: string) => {
-    setIsMobileMenuOpen(false);
-    const url = `/home?category=${category}`;
+    setIsAnimating(false);
+    setTimeout(() => {
+      setIsMobileMenuOpen(false);
+      document.body.style.overflow = 'unset';
+    }, 300);
+    const url = `/home?category=${category}#categories`;
     setLocation(url);
   };
 

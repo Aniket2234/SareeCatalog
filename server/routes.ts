@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { productSearchSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  await storage.initializeData();
+  await storage.connect();
 
   app.get("/api/categories", async (req, res) => {
     try {
@@ -49,11 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "Invalid product ID" });
-      }
-
+      const { id } = req.params;
       const product = await storage.getProductById(id);
       
       if (!product) {
@@ -91,6 +87,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  process.on('SIGINT', async () => {
+    await storage.disconnect();
+    process.exit(0);
+  });
 
   return httpServer;
 }
